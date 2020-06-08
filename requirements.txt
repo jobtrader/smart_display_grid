@@ -1,0 +1,8 @@
+Flask==1.1.1
+Flask-Limiter==1.2.1
+Flask-RESTful==0.3.8
+pytz==2020.1
+requests==2.22.0
+configparser==5.0.0
+setuptools==44.1.0
+selenium==3.141.0
