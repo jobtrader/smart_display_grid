@@ -36,42 +36,27 @@ def welcome():
 @app.route('/getcredential', methods=['GET'])
 def get_credential():
     parser = reqparse.RequestParser(trim=True)
-    parser.add_argument('rfid', required=True)
-    parser.add_argument('id', required=True)
-    parser.add_argument('prefix', required=True)
-    parser.add_argument('firstname', required=True)
-    parser.add_argument('lastname', required=True)
-    parser.add_argument('company', required=True)
-    parser.add_argument('issue_date', required=True)
-    parser.add_argument('expiry_date', required=True)
-    parser.add_argument('contract_type', required=True)
-    parser.add_argument('stamp_datetime', required=True)
-    parser.add_argument('status', required=True)
+    parser.add_argument('id', action='append', required=True)
 
     path = config('webconfig.ini', 'Image')['path']
     args = parser.parse_args()
-    id = args.id
-    prefix = args.prefix.strip()
 
-    image_path_jpg = '{0}/{1}.jpg'.format(path, id)
-    image_path_png = '{0}/{1}.png'.format(path, id)
+    img_paths = list()
+    for id in args.id:
+        image_path_jpg = '{0}/{1}.jpg'.format(path, id)
+        image_path_png = '{0}/{1}.png'.format(path, id)
+        r_jpg = requests.get(image_path_jpg).status_code
+        r_png = requests.get(image_path_png).status_code
 
-    r_jpg = requests.get(image_path_jpg).status_code
-    r_png = requests.get(image_path_png).status_code
-
-    if r_jpg == 200:
-        image_path = image_path_jpg
-    elif r_png == 200:
-        image_path = image_path_png
-    else:
-        if prefix == 'นาย':
-            image_path = "/static/src/img/nobody.jpg"
+        if r_jpg == 200:
+            img_paths.append(image_path_jpg)
+        elif r_png == 200:
+            img_paths.append(image_path_png)
         else:
-            image_path = "/static/src/img/avatar-woman.png"
+            img_paths.append("/static/src/img/nobody.jpg")
 
-    kwargs = {key: args[key] for key in args.keys()}
-    kwargs['image'] = image_path
-    display.show_credential(kwargs)
+
+    display.show_credential(img_paths)
 
     return jsonify(200)
 
@@ -79,39 +64,13 @@ def get_credential():
 @app.route('/showcredential', methods=['GET'])
 def credential():
     parser = reqparse.RequestParser(trim=True)
-    parser.add_argument('rfid', required=True)
-    parser.add_argument('id', required=True)
-    parser.add_argument('prefix', required=True)
-    parser.add_argument('firstname', required=True)
-    parser.add_argument('lastname', required=True)
-    parser.add_argument('company', required=True)
-    parser.add_argument('issue_date', required=True)
-    parser.add_argument('expiry_date', required=True)
-    parser.add_argument('contract_type', required=True)
-    parser.add_argument('stamp_datetime', required=False)
-    parser.add_argument('status', required=True)
-    parser.add_argument('image', required=True)
+    parser.add_argument('image', action='append', required=True)
 
     args = parser.parse_args()
 
-    date_issue = datetime.strptime(args.issue_date, '%d/%m/%Y')
-    date_expire = datetime.strptime(args.expiry_date, '%d/%m/%Y')
-    delta_date = date_expire - date_issue
-    expire_in = delta_date.days
     return render_template('/display_credential.html',
                            page_title=title,
-                           rfid=args.rfid,
-                           id=args.id,
-                           firstname=args.firstname,
-                           lastname=args.lastname,
-                           company=args.company,
-                           contract_type=args.contract_type,
-                           date_issue=args.issue_date,
-                           date_expire=args.expiry_date,
-                           status=args.status,
-                           expire_in=expire_in,
-                           stamp_datetime=args.stamp_datetime,
-                           image=args.image,)
+                           images=args.image,)
 
 
 @app.errorhandler(404)
