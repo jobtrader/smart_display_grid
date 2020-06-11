@@ -68,7 +68,7 @@ def credential():
 
     args = parser.parse_args()
 
-    return render_template('/display_credential.html',
+    return render_template('display_credential.html',
                            page_title=title,
                            images=args.image,)
 
