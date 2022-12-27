@@ -4,5 +4,5 @@ Flask-RESTful==0.3.8
 pytz==2020.1
 requests==2.22.0
 configparser==5.0.0
-setuptools==44.1.0
+setuptools==65.5.1
 selenium==3.141.0
